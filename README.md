@@ -64,6 +64,7 @@ The config should be stored in `config.json` file.
                 "uvicorn",
                 "example:app",
                 "--host"
+            ]
         }
     },
     "anthropic": {
