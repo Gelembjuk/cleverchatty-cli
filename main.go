@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/charmbracelet/glamour"
@@ -23,7 +22,7 @@ import (
 )
 
 const (
-	defaultMOdelFlag = "anthropic:claude-3-5-sonnet-latest"
+	defaultModelFlag = "anthropic:claude-3-5-sonnet-latest"
 )
 
 var (
@@ -85,9 +84,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "mcphost",
+	Use:   "cleverchatty-cli",
 	Short: "Chat with AI models through a unified interface",
-	Long: `MCPHost is a CLI tool that allows you to interact with various AI models
+	Long: `cleverchatty-cli is a CLI tool that allows you to interact with various AI models
 through a unified interface. It supports various tools through MCP servers
 and provides streaming responses.
 
@@ -98,11 +97,11 @@ Available models can be specified using the --model flag:
 - Google: google:modelname
 
 Example:
-  mcphost -m ollama:qwen2.5:3b
-  mcphost -m openai:gpt-4
-  mcphost -m google:gemini-2.0-flash`,
+  cleverchatty-cli -m ollama:qwen2.5:3b
+  cleverchatty-cli -m openai:gpt-4
+  cleverchatty-cli -m google:gemini-2.0-flash`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runMCPHost(context.Background())
+		return run(context.Background())
 	},
 }
 
@@ -113,7 +112,7 @@ func init() {
 		IntVar(&messageWindow, "message-window", 0, "number of messages to keep in context")
 	rootCmd.PersistentFlags().
 		StringVarP(&modelFlag, "model", "m", "",
-			"model to use (format: provider:model, e.g. anthropic:claude-3-5-sonnet-latest or ollama:qwen2.5:3b)")
+			"model to use (format: provider:model, e.g. anthropic:claude-3-5-sonnet-latest or ollama:qwen2.5:3b). If not provided then "+defaultModelFlag+" will be used")
 
 	// Add debug flag
 	rootCmd.PersistentFlags().
@@ -128,17 +127,21 @@ func init() {
 }
 
 func loadConfig() (*cleverchatty.CleverChattyConfig, error) {
-	if configFile == "" {
-		ex, err := os.Executable()
-		if err != nil {
-			return nil, fmt.Errorf("error getting executable path: %v", err)
-		}
-		configFile = filepath.Dir(ex) + "/config.json"
-	}
+
 	var config *cleverchatty.CleverChattyConfig
 	var err error
 	// check config file exists
-	if _, err = os.Stat(configFile); os.IsNotExist(err) {
+	if configFile == "" {
+		if _, err = os.Stat("config.json"); err == nil {
+			// try to use the standard name for the config file in the current directory
+			configFile = "config.json"
+		}
+	}
+	if configFile == "" {
+		// use empty config
+		err = nil
+		config = &cleverchatty.CleverChattyConfig{}
+	} else if _, err = os.Stat(configFile); os.IsNotExist(err) {
 		config, err = cleverchatty.CreateStandardConfigFile(configFile)
 	} else {
 		config, err = cleverchatty.LoadMCPConfig(configFile)
@@ -156,7 +159,7 @@ func loadConfig() (*cleverchatty.CleverChattyConfig, error) {
 		config.Model = modelFlag
 	}
 	if config.Model == "" {
-		config.Model = defaultMOdelFlag
+		config.Model = defaultModelFlag
 	}
 	if openaiBaseURL != "" {
 		config.OpenAI.BaseURL = openaiBaseURL
@@ -262,8 +265,8 @@ func handleHelpCommand() {
 	markdown.WriteString("- **Ollama Models**: `ollama:modelname`\n")
 	markdown.WriteString("\nExamples:\n")
 	markdown.WriteString("```\n")
-	markdown.WriteString("mcphost -m anthropic:claude-3-5-sonnet-latest\n")
-	markdown.WriteString("mcphost -m ollama:qwen2.5:3b\n")
+	markdown.WriteString("cleverchatty-cli -m anthropic:claude-3-5-sonnet-latest\n")
+	markdown.WriteString("cleverchatty-cli -m ollama:qwen2.5:3b\n")
 	markdown.WriteString("```\n")
 
 	rendered, err := renderer.Render(markdown.String())
@@ -532,7 +535,7 @@ func showSpinner(text string) {
 		actionCanceledChannel <- true
 	}()
 }
-func runMCPHost(ctx context.Context) error {
+func run(ctx context.Context) error {
 	config, err := loadConfig()
 	if err != nil {
 		return fmt.Errorf("error loading config: %v", err)
