@@ -40,6 +40,12 @@ var (
 )
 
 var (
+	actionInProgress      = false
+	actionChannel         = make(chan bool)
+	actionCanceledChannel = make(chan bool)
+)
+
+var (
 	// Tokyo Night theme colors
 	tokyoPurple = lipgloss.Color("99")  // #9d7cd8
 	tokyoCyan   = lipgloss.Color("73")  // #7dcfff
@@ -505,6 +511,27 @@ func handleHistoryCommand(cleverChattyObject cleverchatty.CleverChatty) {
 	// Print directly without box
 	fmt.Print("\n" + rendered + "\n")
 }
+func releaseActionSpinner() {
+	if actionInProgress {
+		actionInProgress = false
+		actionChannel <- true
+		<-actionCanceledChannel
+	}
+}
+
+func showSpinner(text string) {
+	if actionInProgress {
+		releaseActionSpinner()
+	}
+	actionInProgress = true
+	go func() {
+		_ = spinner.New().Title(text).Action(func() {
+			<-actionChannel
+		}).Run()
+
+		actionCanceledChannel <- true
+	}()
+}
 func runMCPHost(ctx context.Context) error {
 	config, err := loadConfig()
 	if err != nil {
@@ -527,22 +554,24 @@ func runMCPHost(ctx context.Context) error {
 	}()
 
 	cleverChattyObject.Callbacks.SetStartedPromptProcessing(func(prompt string) error {
-		fmt.Printf("\n%s%s\n", promptStyle.Render("You: "), prompt)
+		fmt.Printf("\n%s%s\n\n", promptStyle.Render("You: "), prompt)
 		return nil
 	})
 	cleverChattyObject.Callbacks.SetStartedThinking(func() error {
-		fmt.Printf("\n%s\n", descriptionStyle.Render("Thinking..."))
+		showSpinner("💭 Thinking...")
 		return nil
 	})
 	cleverChattyObject.Callbacks.SetToolCalling(func(toolName string) error {
-		fmt.Printf("%s\n", toolNameStyle.Render("🔧 Using tool: "+toolName))
+		showSpinner("🔧 Using tool: " + toolName)
 		return nil
 	})
 	cleverChattyObject.Callbacks.SetToolCallFailed(func(toolName string, err error) error {
+		releaseActionSpinner()
 		fmt.Printf("\n%s\n", errorStyle.Render("Error using tool: "+toolName))
 		return nil
 	})
 	cleverChattyObject.Callbacks.SetResponseReceived(func(response string) error {
+		releaseActionSpinner()
 		fmt.Printf("\n%s%s\n\n", responseStyle.Render("Assistant: "), response)
 		return nil
 	})
