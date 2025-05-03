@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/huh/spinner v0.0.0-20250414191420-151ba059f6ea
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
 	github.com/charmbracelet/log v0.4.0
-	github.com/gelembjuk/cleverchatty v0.1.0
+	github.com/gelembjuk/cleverchatty v0.1.1
 	github.com/mark3labs/mcphost v0.6.0
 	github.com/spf13/cobra v1.9.1
 	golang.org/x/term v0.31.0
