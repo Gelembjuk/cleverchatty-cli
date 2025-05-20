@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	markdown "github.com/MichaelMure/go-term-markdown"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/glamour/styles"
 	"github.com/charmbracelet/huh"
@@ -557,7 +558,7 @@ func run(ctx context.Context) error {
 	}()
 
 	cleverChattyObject.Callbacks.SetStartedPromptProcessing(func(prompt string) error {
-		fmt.Printf("\n%s%s\n\n", promptStyle.Render("You: "), prompt)
+		fmt.Printf("\n%s%s\n\n", promptStyle.Render("You: "), markdown.Render(prompt, 80, 6))
 		return nil
 	})
 	cleverChattyObject.Callbacks.SetStartedThinking(func() error {
@@ -575,7 +576,7 @@ func run(ctx context.Context) error {
 	})
 	cleverChattyObject.Callbacks.SetResponseReceived(func(response string) error {
 		releaseActionSpinner()
-		fmt.Printf("\n%s%s\n\n", responseStyle.Render("Assistant: "), response)
+		fmt.Printf("\n%s%s\n\n", responseStyle.Render("Assistant: "), markdown.Render(response, 80, 6))
 		return nil
 	})
 
