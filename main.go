@@ -23,6 +23,7 @@ import (
 )
 
 const (
+	version          = "0.1.2"
 	defaultModelFlag = "anthropic:claude-3-5-sonnet-latest"
 )
 
@@ -86,7 +87,7 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "cleverchatty-cli",
-	Short: "Chat with AI models through a unified interface",
+	Short: "Chat with AI models through a unified interface. Version: " + version,
 	Long: `cleverchatty-cli is a CLI tool that allows you to interact with various AI models
 through a unified interface. It supports various tools through MCP servers
 and provides streaming responses.
@@ -115,6 +116,16 @@ func init() {
 		StringVarP(&modelFlag, "model", "m", "",
 			"model to use (format: provider:model, e.g. anthropic:claude-3-5-sonnet-latest or ollama:qwen2.5:3b). If not provided then "+defaultModelFlag+" will be used")
 
+	rootCmd.PersistentFlags().
+		BoolP("version", "v", false, "show version and exit")
+	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		showVersion, _ := cmd.Flags().GetBool("version")
+		if showVersion {
+			handleVersionCommand()
+			os.Exit(0)
+		}
+		return nil
+	}
 	// Add debug flag
 	rootCmd.PersistentFlags().
 		BoolVar(&debugMode, "debug", false, "enable debug logging")
@@ -145,7 +156,7 @@ func loadConfig() (*cleverchatty.CleverChattyConfig, error) {
 	} else if _, err = os.Stat(configFile); os.IsNotExist(err) {
 		config, err = cleverchatty.CreateStandardConfigFile(configFile)
 	} else {
-		config, err = cleverchatty.LoadMCPConfig(configFile)
+		config, err = cleverchatty.LoadConfig(configFile)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("error loading config file: %v", err)
@@ -223,6 +234,9 @@ func handleSlashCommand(prompt string, cleverChattyObject cleverchatty.CleverCha
 	case "/help":
 		handleHelpCommand()
 		return true, nil
+	case "/version":
+		handleVersionCommand()
+		return true, nil
 	case "/history":
 		handleHistoryCommand(cleverChattyObject)
 		return true, nil
@@ -269,6 +283,32 @@ func handleHelpCommand() {
 	markdown.WriteString("cleverchatty-cli -m anthropic:claude-3-5-sonnet-latest\n")
 	markdown.WriteString("cleverchatty-cli -m ollama:qwen2.5:3b\n")
 	markdown.WriteString("```\n")
+	markdown.WriteString("\n\n## Version\n\n")
+	markdown.WriteString("CleverChatty CLI version: " + version + "\n")
+
+	rendered, err := renderer.Render(markdown.String())
+	if err != nil {
+		fmt.Printf(
+			"\n%s\n",
+			errorStyle.Render(fmt.Sprintf("Error rendering help: %v", err)),
+		)
+		return
+	}
+
+	fmt.Print(rendered)
+}
+
+func handleVersionCommand() {
+	if err := updateRenderer(); err != nil {
+		fmt.Printf(
+			"\n%s\n",
+			errorStyle.Render(fmt.Sprintf("Error updating renderer: %v", err)),
+		)
+		return
+	}
+	var markdown strings.Builder
+
+	markdown.WriteString("## CleverChatty CLI version: " + version + "\n")
 
 	rendered, err := renderer.Render(markdown.String())
 	if err != nil {
@@ -551,7 +591,7 @@ func run(ctx context.Context) error {
 
 	defer func() {
 
-		log.Info("Shutting down CleverChatty codre...")
+		log.Info("Shutting down CleverChatty core...")
 
 		cleverChattyObject.Finish()
 

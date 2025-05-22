@@ -50,6 +50,7 @@ The config should be stored in `config.json` file.
 {
     "log_file_path": "",
     "model": "ollama:qwen2.5:3b",
+    "system_instruction": "Talk to a user like you are Elvis Presley.",
     "mcpServers": {
         "File_Storage_Server": {
             "url": "http://localhost:8000/sse",
@@ -85,6 +86,41 @@ The config should be stored in `config.json` file.
 ```
 
 The section `mcpServers` contains all MCP servers config. It supports both STDIO and SSE servers.
+
+### Usig the memory server
+
+This tools allows to use long-term AI memory using a MCP server of specific interface.
+
+```
+"mcpServers": {
+        "Memory_Server": {
+            "url": "http://localhost:8001/sse",
+            "headers": [
+            ],
+            "interface": "memory"
+        },
+        .... other MCP servers
+    },
+```
+
+The value "interface": "memory" indicates that this server is a memory server. It will be used to store the chat history and the AI will be able to use it in the future conversations.
+
+### Using the Retrieval-Augmented Generation server
+
+This tools allows to use RAG using a MCP server of specific interface.
+
+```
+"mcpServers": {
+        "RAG_Server": {
+            "url": "http://localhost:8002/sse",
+            "headers": [
+            ],
+            "interface": "rag"
+        },
+        .... other MCP servers
+    },
+```
+The value "interface": "rag" indicates that this server is a RAG server. It will be used to store the chat history and the AI will be able to use it in the future conversations.
 
 To run the chat using this config stored in teh `config.json`, you can use the command:
 

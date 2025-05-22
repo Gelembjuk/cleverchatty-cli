@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/huh/spinner v0.0.0-20250414191420-151ba059f6ea
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
 	github.com/charmbracelet/log v0.4.0
-	github.com/gelembjuk/cleverchatty v0.1.1
+	github.com/gelembjuk/cleverchatty v0.1.2
 	github.com/mark3labs/mcphost v0.6.0
 	github.com/spf13/cobra v1.9.1
 	golang.org/x/term v0.31.0
@@ -58,7 +58,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kyokomi/emoji/v2 v2.2.8 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/mark3labs/mcp-go v0.20.0 // indirect
+	github.com/mark3labs/mcp-go v0.29.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
@@ -71,6 +71,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/ollama/ollama v0.5.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
