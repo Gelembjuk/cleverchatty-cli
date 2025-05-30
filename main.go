@@ -602,7 +602,15 @@ func run(ctx context.Context) error {
 		return nil
 	})
 	cleverChattyObject.Callbacks.SetStartedThinking(func() error {
-		showSpinner("💭 Thinking...")
+		showSpinner("💭  Thinking...")
+		return nil
+	})
+	cleverChattyObject.Callbacks.SetMemoryRetrievalStarted(func() error {
+		showSpinner("🕰️  Recalling...")
+		return nil
+	})
+	cleverChattyObject.Callbacks.SetRAGRetrievalStarted(func() error {
+		showSpinner("🗃️  Searching knowledge database ...")
 		return nil
 	})
 	cleverChattyObject.Callbacks.SetToolCalling(func(toolName string) error {
