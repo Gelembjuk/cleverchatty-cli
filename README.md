@@ -105,6 +105,36 @@ This tools allows to use long-term AI memory using a MCP server of specific inte
 
 The value "interface": "memory" indicates that this server is a memory server. It will be used to store the chat history and the AI will be able to use it in the future conversations.
 
+The interface requires a MCP server to have two tools - `remember` and `recall`. 
+
+Example:
+
+```python
+@mcp.tool()
+def remember(role: str, contents) -> str:
+    """Remembers new data in the memory
+    
+    Args:
+        role (str): The role of the data, e.g. "user", "assistant"
+        contents (str): The contents to remember, usually the text of the message
+    """
+
+    Memory(config).remember(role, contents)
+
+    return "ok"
+
+@mcp.tool()
+def recall() -> str:
+    """Recall the memory"""
+    
+    r = Memory(config).recall()
+
+    if not r:
+        return "none"
+    
+    return r
+```
+
 ### Using the Retrieval-Augmented Generation server
 
 This tools allows to use RAG using a MCP server of specific interface.
@@ -121,6 +151,34 @@ This tools allows to use RAG using a MCP server of specific interface.
     },
 ```
 The value "interface": "rag" indicates that this server is a RAG server. It will be used to store the chat history and the AI will be able to use it in the future conversations.
+
+The expected interface is the one tool named `knowledge_search` with two arguments: `query` and `num`. 
+
+Example:
+
+```golang
+func createServer() *server.MCPServer {
+	// Create MCP server
+	s := server.NewMCPServer(
+		"Retrieval-Augmented Generation Server. Adding the company data to the AI chat.",
+		"1.0.0",
+	)
+
+	execTool := mcp.NewTool("knowledge_search",
+		mcp.WithDescription("Search for documents and information over the company data storage"),
+		mcp.WithString("query",
+			mcp.Required(),
+			mcp.Description("The query to search for documents and information"),
+		),
+		mcp.WithNumber("num",
+			mcp.Description("The number of results to return"),
+		),
+	)
+
+	s.AddTool(execTool, cmdKnowledgeSearch)
+	return s
+}
+```
 
 To run the chat using this config stored in teh `config.json`, you can use the command:
 
