@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	version          = "0.1.2"
+	version          = "0.1.4"
 	defaultModelFlag = "anthropic:claude-3-5-sonnet-latest"
 )
 
