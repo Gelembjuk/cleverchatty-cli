@@ -124,16 +124,25 @@ def remember(role: str, contents) -> str:
     return "ok"
 
 @mcp.tool()
-def recall() -> str:
+def recall(query: str = "") -> str:
     """Recall the memory"""
     
-    r = Memory(config).recall()
+    r = Memory(config).recall(query)
 
     if not r:
         return "none"
     
     return r
 ```
+
+### `remember` tool accepts two arguments:
+- `role`: The role of the data, e.g. "user", "assistant"
+- `contents`: The contents to remember, usually the text of the message
+
+### `recall` tool accepts one argument:
+- `query`: The query to search for the data in the memory. If empty, it is expected to return some common memories.
+
+
 
 ### Using the Retrieval-Augmented Generation server
 
