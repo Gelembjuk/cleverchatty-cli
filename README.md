@@ -2,6 +2,11 @@
 
 The CLI application based on the [CleverChatty](https://github.com/Gelembjuk/cleverchatty) package.
 
+> **⚠️ UPDATE:**  
+> **This project is now archived. Development has moved to the [CleverChatty](https://github.com/Gelembjuk/cleverchatty) repository.**  
+> You can use the `cleverchatty-cli` package from there as well.
+
+
 This application is the comand line AI chat tool. It allows to comunicate with veriety of LLMs and it has support of external tools calls using the MCP(Model Context Protocol).
 
 ## Quick run
